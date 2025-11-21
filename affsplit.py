@@ -1,19 +1,8 @@
-from afflex import AffFile, AffElement, AffTimingGroup
+from afflex import AffFile, AffElement
 import math
 import copy
 
-filePath = input("file path: ")
 
-
-affString = ""
-
-with open(filePath, "r", encoding="utf-8") as f:
-    affString = f.read()
-
-affFile = AffFile()
-affFile.load(affString)
-affFile.TimingPointDensityFactor = str(int(affFile.TimingPointDensityFactor))
-affFile.AudioOffset = str(int(affFile.AudioOffset))
 
 def parseArc(arc: AffElement):
     if (arc.name != "arc"):
@@ -61,7 +50,7 @@ def buildArc(arcDict) -> AffElement:
         ]
     )
 
-def calcPosOffset(t_cur: int, t_arc_start: int, t_arc_end: int, arc_type: str) -> (float, float):
+def calcPosOffset(t_cur: int, t_arc_start: int, t_arc_end: int, arc_type: str) -> tuple[float, float]:
     '''
     calculate pos offset
     '''
@@ -120,26 +109,10 @@ def splitArc(arc: AffElement):
         splitted_element_list.append(genArctapArc(x, y, t))
     return splitted_element_list
 
-new_list = []
-# Base Group
-for element in affFile.Elements:
-    if element.name != "arc":
-        new_list.append(element)
-        continue
-    arc_dict = parseArc(element)
-    if len(arc_dict["arctapTime"]) == 0:
-        new_list.append(element)
-        continue
-    splitted_list = splitArc(element)
-    for splitted in splitted_list:
-        new_list.append(splitted)
-
-affFile.Elements = copy.deepcopy(new_list)
-
-# Timing Group
-for group in affFile.TimingGroups:
+def make_split(affFile: AffFile) -> AffFile:
     new_list = []
-    for element in group.Elements:
+    # Base Group
+    for element in affFile.Elements:
         if element.name != "arc":
             new_list.append(element)
             continue
@@ -151,8 +124,43 @@ for group in affFile.TimingGroups:
         for splitted in splitted_list:
             new_list.append(splitted)
 
-    group.Elements = copy.deepcopy(new_list)
+    affFile.Elements = copy.deepcopy(new_list)
 
+    # Timing Group
+    for group in affFile.TimingGroups:
+        new_list = []
+        for element in group.Elements:
+            if element.name != "arc":
+                new_list.append(element)
+                continue
+            arc_dict = parseArc(element)
+            if len(arc_dict["arctapTime"]) == 0:
+                new_list.append(element)
+                continue
+            splitted_list = splitArc(element)
+            for splitted in splitted_list:
+                new_list.append(splitted)
 
-with open(f"{filePath}_produced.aff", "w+", encoding="utf-8") as f:
-    f.write(affFile.toString())
+        group.Elements = copy.deepcopy(new_list)
+    
+    return affFile
+
+def module_main():
+    filePath = input("file path: ")
+    affString = ""
+
+    with open(filePath, "r", encoding="utf-8") as f:
+        affString = f.read()
+
+    affFile = AffFile()
+    affFile.load(affString)
+    affFile.TimingPointDensityFactor = str(int(affFile.TimingPointDensityFactor))
+    affFile.AudioOffset = str(int(affFile.AudioOffset))
+
+    affFile = make_split(affFile)
+
+    with open(f"{filePath}_produced.aff", "w+", encoding="utf-8") as f:
+        f.write(affFile.toString())
+
+if __name__ == "__main__":
+    module_main()

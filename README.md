@@ -28,4 +28,8 @@ A tool to help generate a songlist template for a chart. You offer a template an
 
 ## affsplit.py (Aff Split)
 
-The tool helps to extract the arctaps on every traces and made them independent and not guided (i.e. guided on a trace whose time stamp period is only 1). This tool is written today and you may see new code styles in it, which is my goal to revolute the toolset.
+The tool helps to extract the arctaps on every traces and made them independent and not guided (i.e. guided on a trace whose time stamp period is only 1). 
+
+## affcut.py (Aff Cut)
+
+This tool uses `affsplit.py, afflex.py, afffrwrd.py` to cut out a segment from the original given chart file. To use this, you must install `ffmpeg`, and put `2.aff` and `base.ogg` to the directory where the scripts are placed.

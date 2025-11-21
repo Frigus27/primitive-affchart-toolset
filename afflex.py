@@ -149,7 +149,6 @@ class AffFile:
             if len(eachLine) != 0:
                 self.Elements.append(lex_main_line(eachLine))
                 t+=1
-        print(t)
         
     def toString(self) :
         s = "AudioOffset:" + self.AudioOffset + "\nTimingPointDensityFactor:" + self.TimingPointDensityFactor + "\n-\n"
